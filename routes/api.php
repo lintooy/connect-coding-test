@@ -16,21 +16,33 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['guest'])->prefix('/admin')->group(function () {
-    Route::post('login', [LoginController::class, 'login']);
+Route::prefix('v1')->group(function () {
+    Route::middleware(['guest'])->prefix('/admin')->group(function () {
+        Route::post('login', [LoginController::class, 'login']);
+    });
+
+    Route::middleware('auth:sanctum')->prefix('/admin')->group(function () {
+        Route::post('logout', [LoginController::class, 'logout']);
+
+        Route::get('me', [AdminController::class, 'me']);
+    });
+
+    Route::prefix('jobs')
+        ->name('job.')
+        ->controller(JobController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{job}', 'show')->name('show');
+        });
+
+    Route::prefix('admin/jobs')
+        ->name('job.')
+        ->controller(JobController::class)
+        ->group(function () {
+            Route::get('/', 'viewByAdmin')->name('view.admin');
+            Route::get('/{job}', 'showByAdmin')->name('show.admin');
+            Route::post('/', 'store')->name('store');
+            Route::put('/{job}', 'update')->name('update');
+            Route::delete('/{job}', 'destroy')->name('destroy');
+        });
 });
-
-Route::middleware('auth:sanctum')->prefix('/admin')->group(function () {
-    Route::post('logout', [LoginController::class, 'logout']);
-
-    Route::get('me', [AdminController::class, 'me']);
-});
-
-Route::get('/jobs', [JobController::class, 'view'])->name('job.view');
-Route::get('/jobs/{id}', [JobController::class, 'show'])->name('job.show');
-
-Route::get('/admin/jobs', [JobController::class, 'viewByAdmin'])->name('job.view.admin');
-Route::get('/admin/jobs/{id}', [JobController::class, 'showByAdmin'])->name('job.show.admin');
-Route::post('/admin/jobs', [JobController::class, 'create'])->name('job.create');
-Route::put('/admin/jobs/{id}', [JobController::class, 'update'])->name('job.update');
-Route::delete('/admin/jobs/{id}', [JobController::class, 'delete'])->name('job.delete');
