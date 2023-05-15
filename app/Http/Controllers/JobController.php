@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JobStatus;
 use App\Http\Requests\JobStoreRequest;
 use App\Http\Resources\JobResource;
 use App\Models\Job;
 use App\Services\JobService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response;
@@ -38,6 +40,10 @@ class JobController extends Controller
      */
     public function show(Job $job): JobResource
     {
+        if ($job->status->value !== JobStatus::Open) {
+            abort(404);
+        }
+
         return new JobResource($job);
     }
 

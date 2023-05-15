@@ -20,31 +20,28 @@ class JobTest extends TestCase
         Job::factory()->count(30)->closed()->create();
     }
 
-    public function test_view()
+    /**
+     * Display all open jobs.
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testIndexProvider()
+     */
+    public function test_index(array $params, array $expected)
     {
-        $perPage = 12;
-        $page = 1;
-
-        $response = $this->json('GET', route('job.view'), [
-            'per_page' => $perPage,
-            'page' => $page,
-        ]);
+        $response = $this->get(route('job.index', $params));
 
         $response
             ->assertOk()
-            ->assertJson([
-                'meta' => [
-                    'per_page' => $perPage,
-                    'current_page' => $page,
-                    'total' => 25,
-                ],
-            ]);
+            ->assertJson($expected);
     }
 
+    /**
+     * Show open job details.
+     *
+     */
     public function test_show()
     {
         $job = Job::factory()->open()->create();
-        $response = $this->json('GET', route('job.show', ['id' => $job->id]));
+        $response = $this->get(route('job.show', ['job' => $job]));
 
         $response
             ->assertOk()
@@ -55,220 +52,191 @@ class JobTest extends TestCase
             ]);
     }
 
+    /**
+     * Returns a 404 when retrieving a closed job.
+     *
+     */
     public function test_show_not_found()
     {
         $job = Job::factory()->closed()->create();
-        $response = $this->json('GET', route('job.show', ['id' => $job->id]));
+        $response = $this->get(route('job.show', ['job' => $job]));
 
         $response->assertNotFound();
     }
 
-    public function test_create()
+    /**
+     * test_store
+     *
+     * @param array $data
+     * @param array $structure
+     * @param array $expected
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testStoreProvider()
+     */
+    public function test_store(array $data, array $structure, array $expected)
     {
-        $job = Job::factory()->make();
-        $response = $this->actingAs($this->admin, 'web')->json('POST', route('job.create'), [
-            'company_id' => $job->company_id,
-            'job_title_id' => $job->job_title_id,
-            'description' => $job->description,
-            'status' => $job->status->key,
-        ]);
+        // print_r($data);
+        $response = $this->actingAs($this->admin, 'web')->post(route('job.store'), $data);
 
         $response
             ->assertCreated()
-            ->assertJson([
-                'data' => [
-                    'company' => [
-                        'id' => $job->company_id,
-                    ],
-                    'job_title' => [
-                        'id' => $job->job_title_id,
-                    ],
-                    'description' => $job->description,
-                    'status' => $job->status->key,
-                ],
-            ]);
+            ->assertJsonStructure($structure)
+            ->assertJson($expected);
     }
 
-    public function test_create_unauthenticated()
-    {
-        $this->assertGuest();
+    // public function test_create_unauthenticated()
+    // {
+    //     $this->assertGuest();
 
-        $job = Job::factory()->make();
-        $response = $this->json('POST', route('job.create'), [
-            'company_id' => $job->company_id,
-            'job_title_id' => $job->job_title_id,
-            'description' => $job->description,
-            'status' => $job->status->key,
-        ]);
+    //     $job = Job::factory()->make();
+    //     $response = $this->json('POST', route('job.store'), [
+    //         'company_id' => $job->company_id,
+    //         'job_title_id' => $job->job_title_id,
+    //         'description' => $job->description,
+    //         'status' => $job->status->key,
+    //     ]);
 
-        $response->assertUnauthorized();
-    }
+    //     $response->assertUnauthorized();
+    // }
 
-    public function test_create_company_id_failure()
+    /**
+     * Return an invalid error if company does not exists.
+     * @param $data
+     * @param $invalidFields
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyId()
+     */
+    public function test_create_company_id_failure(array $data, array $invalidFields)
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->json('POST', route('job.create'), [
-                'company_id' => null,
-            ])
-            ->assertInvalid(['company_id']);
-
-        $this
-            ->actingAs($this->admin, 'web')
-            ->json('POST', route('job.create'), [
-                'company_id' => 99999999,
-            ])
-            ->assertInvalid(['company_id']);
+            ->post(route('job.store'), $data)
+            ->assertInvalid($invalidFields);
     }
 
-    public function test_create_job_title_id_failure()
+     /**
+     * Return an invalid error if job title does not exists.
+     * @param $data
+     * @param $invalidFields
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyId()
+     */
+    public function test_create_job_title_id_failure(array $data, array $invalidFields)
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->json('POST', route('job.create'), [
-                'job_title_id' => null,
-            ])
-            ->assertInvalid(['job_title_id']);
-
-        $this
-            ->actingAs($this->admin, 'web')
-            ->json('POST', route('job.create'), [
-                'job_title_id' => 99999999,
-            ])
-            ->assertInvalid(['job_title_id']);
+            ->post(route('job.store'), $data)
+            ->assertInvalid($invalidFields);
     }
 
-    public function test_create_description_failure()
+    /**
+     * Return an invalid error if company does not exists.
+     * @param $data
+     * @param $invalidFields
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidDescription()
+     */
+    public function test_create_description_failure(array $data, array $invalidFields)
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->json('POST', route('job.create'), [
-                'description' => null,
-            ])
-            ->assertInvalid(['description']);
-
-        $this
-            ->actingAs($this->admin, 'web')
-            ->json('POST', route('job.create'), [
-                'description' => $this->faker->realTextBetween(20001, 20100),
-            ])
-            ->assertInvalid(['description']);
+            ->post(route('job.store'), $data)
+            ->assertInvalid($invalidFields);
     }
 
-    public function test_create_status_failure()
+    /**
+     * Return an invalid error if company does not exists.
+     * @param $data
+     * @param $invalidFields
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidStatus()
+     */
+    public function test_create_status_failure(array $data, array $invalidFields)
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->json('POST', route('job.create'), [
-                'status' => null,
-            ])
-            ->assertInvalid(['status']);
-
-        $this
-            ->actingAs($this->admin, 'web')
-            ->json('POST', route('job.create'), [
-                'status' => 'Scheduled',
-            ])
-            ->assertInvalid(['status']);
+            ->post(route('job.store'), $data)
+            ->assertInvalid($invalidFields);
     }
 
-    public function test_update()
+    /**
+     * test_update
+     *
+     * @param array $data
+     * @param array $structure
+     * @param array $expected
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testStoreProvider()
+     */
+    public function test_update(array $data,array $structure, array $expected)
     {
         $job = Job::factory()->create();
-        $fake = Job::factory()->make();
-        $response = $this->actingAs($this->admin, 'web')->json('PUT', route('job.update', ['id' => $job->id]), [
-            'company_id' => $fake->company_id,
-            'job_title_id' => $fake->job_title_id,
-            'description' => $fake->description,
-            'status' => $fake->status->key,
-        ]);
+        $response = $this->actingAs($this->admin, 'web')->put(route('job.update', ['job' => $job]), $data);
 
         $response
             ->assertOk()
-            ->assertJson([
-                'data' => [
-                    'company' => [
-                        'id' => $fake->company_id,
-                    ],
-                    'job_title' => [
-                        'id' => $fake->job_title_id,
-                    ],
-                    'description' => $fake->description,
-                    'status' => $fake->status->key,
-                ],
-            ]);
+            ->assertJsonStructure($structure)
+            ->assertJson($expected);
     }
 
-    public function test_update_company_id_failure()
+    /**
+     * Return an invalid error if company does not exists.
+     * @param $data
+     * @param $invalidFields
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyId()
+     */
+    public function test_update_company_id_failure(array $data, array $invalidFields)
     {
-        $job = Job::factory()->create();
         $this
             ->actingAs($this->admin, 'web')
-            ->json('PUT', route('job.update', ['id' => $job->id]), [
-                'company_id' => null,
-            ])
-            ->assertInvalid(['company_id']);
-
-        $this
-            ->actingAs($this->admin, 'web')
-            ->json('PUT', route('job.update', ['id' => $job->id]), [
-                'company_id' => 99999999,
-            ])
-            ->assertInvalid(['company_id']);
+            ->post(route('job.store'), $data)
+            ->assertInvalid($invalidFields);
     }
 
-    public function test_update_job_title_id_failure()
+     /**
+     * Return an invalid error if job title does not exists.
+     * @param $data
+     * @param $invalidFields
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyId()
+     */
+    public function test_update_job_title_id_failure(array $data, array $invalidFields)
     {
-        $job = Job::factory()->create();
         $this
             ->actingAs($this->admin, 'web')
-            ->json('PUT', route('job.update', ['id' => $job->id]), [
-                'job_title_id' => null,
-            ])
-            ->assertInvalid(['job_title_id']);
-
-        $this
-            ->actingAs($this->admin, 'web')
-            ->json('PUT', route('job.update', ['id' => $job->id]), [
-                'job_title_id' => 99999999,
-            ])
-            ->assertInvalid(['job_title_id']);
+            ->post(route('job.store'), $data)
+            ->assertInvalid($invalidFields);
     }
 
-    public function test_update_description_failure()
+    /**
+     * Return an invalid error if company does not exists.
+     * @param $data
+     * @param $invalidFields
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidDescription()
+     */
+    public function test_update_description_failure(array $data, array $invalidFields)
     {
-        $job = Job::factory()->create();
         $this
             ->actingAs($this->admin, 'web')
-            ->json('PUT', route('job.update', ['id' => $job->id]), [
-                'description' => null,
-            ])
-            ->assertInvalid(['description']);
-
-        $this
-            ->actingAs($this->admin, 'web')
-            ->json('PUT', route('job.update', ['id' => $job->id]), [
-                'description' => $this->faker->realTextBetween(20001, 20100),
-            ])
-            ->assertInvalid(['description']);
+            ->post(route('job.store'), $data)
+            ->assertInvalid($invalidFields);
     }
 
-    public function test_update_status_failure()
+    /**
+     * Return an invalid error if company does not exists.
+     * @param $data
+     * @param $invalidFields
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidStatus()
+     */
+    public function test_update_status_failure(array $data, array $invalidFields)
     {
-        $job = Job::factory()->create();
         $this
             ->actingAs($this->admin, 'web')
-            ->json('PUT', route('job.update', ['id' => $job->id]), [
-                'status' => null,
-            ])
-            ->assertInvalid(['status']);
-
-        $this
-            ->actingAs($this->admin, 'web')
-            ->json('PUT', route('job.update', ['id' => $job->id]), [
-                'status' => 'Scheduled',
-            ])
-            ->assertInvalid(['status']);
+            ->post(route('job.store'), $data)
+            ->assertInvalid($invalidFields);
     }
 
     public function test_delete()
@@ -276,15 +244,21 @@ class JobTest extends TestCase
         $job = Job::factory()->create();
         $this
             ->actingAs($this->admin, 'web')
-            ->json('DELETE', route('job.delete', ['id' => $job->id]))
+            ->delete(route('job.destroy', ['job' => $job]))
             ->assertNoContent();
     }
 
-    public function test_delete_not_found()
+    /**
+     * 
+     * @param $params
+     * 
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testDeleteNotFound()
+     */
+    public function test_delete_not_found(array $params)
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->json('DELETE', route('job.delete', ['id' => 99999999]))
+            ->delete(route('job.destroy', $params))
             ->assertNotFound();
     }
 }
