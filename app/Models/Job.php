@@ -14,6 +14,8 @@ class Job extends Model
         'status' => JobStatus::class,
     ];
 
+    protected $fillable = ['company_id', 'job_title_id', 'description', 'status'];
+
     public function company()
     {
         return $this->belongsTo(Company::class);

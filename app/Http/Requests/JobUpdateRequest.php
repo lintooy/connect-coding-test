@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\JobStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
-class JobStoreRequest extends FormRequest
+class JobUpdateRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

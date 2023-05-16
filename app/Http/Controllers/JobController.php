@@ -2,59 +2,73 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\JobStatus;
 use App\Http\Requests\JobStoreRequest;
+use App\Http\Requests\JobUpdateRequest;
 use App\Http\Resources\JobResource;
 use App\Models\Job;
+use App\Services\JobService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response;
 
 class JobController extends Controller
 {
+
+    /**
+     * __construct
+     *
+     * @param JobService $jobService
+     */
+    public function __construct(protected JobService $jobService)
+    {
+    }
+
     /**
      * Get a list of opening jobs to applicants.
      *
      * @param Request $request
-     * @return void
+     * 
+     * @return ResourceCollection
      */
-    public function view(Request $request)
+    public function index(Request $request): ResourceCollection
     {
-        $jobs = Job::where('status', JobStatus::Open)->paginate($request->per_page);
-        return JobResource::collection($jobs);
+        return JobResource::collection($this->jobService->allOpenJobs($request));
     }
 
     /**
      * Show a opening job to applicants.
      *
-     * @param integer $id
-     * @return void
+     * @param Job $job
+     * 
+     * @return mixed
      */
-    public function show(int $id)
+    public function show(Job $job): mixed
     {
-        $job = Job::where('status', JobStatus::Open)->find($id);
-        return new JobResource($job);
+        return $this->jobService->showOpenJob($job);
     }
 
     /**
      * Get a list of opening jobs to applicants by admin.
      *
      * @param Request $request
-     * @return void
+     * 
+     * @return ResourceCollection
      */
-    public function viewByAdmin(Request $request)
+    public function viewByAdmin(Request $request): ResourceCollection
     {
-        $jobs = Job::paginate($request->per_page);
-        return JobResource::collection($jobs);
+        return JobResource::collection($this->jobService->allJobs($request));
     }
 
     /**
      * Show a opening job to applicants by admin.
      *
-     * @param integer $id
-     * @return void
+     * @param Job $job
+     * 
+     * @return JobResource
      */
-    public function showAdmin(int $id)
+    public function showByAdmin(Job $job): JobResource
     {
-        $job = Job::find($id);
         return new JobResource($job);
     }
 
@@ -62,47 +76,36 @@ class JobController extends Controller
      * Register a job by admin.
      *
      * @param JobStoreRequest $request
-     * @return void
+     * 
+     * @return JobResource
      */
-    public function create(JobStoreRequest $request)
+    public function store(JobStoreRequest $request): JobResource
     {
-        $job = new Job;
-        $job->company_id = $request->company_id;
-        $job->job_title_id = $request->job_title_id;
-        $job->description = $request->description;
-        $job->status = JobStatus::fromKey($request->status);
-        $job->save();
-        return new JobResource($job);
+        return new JobResource($this->jobService->createJob($request->safe()));
     }
 
     /**
      * Update job by admin.
      *
      * @param JobStoreRequest $request
-     * @param integer $id
-     * @return void
+     * @param Job $job
+     * 
+     * @return JobResource
      */
-    public function update(JobStoreRequest $request, int $id)
+    public function update(JobUpdateRequest $request, Job $job): JobResource
     {
-        $job = Job::find($id);
-        $job->company_id = $request->company_id;
-        $job->job_title_id = $request->job_title_id;
-        $job->description = $request->description;
-        $job->status = JobStatus::fromKey($request->status);
-        $job->save();
-        return new JobResource($job);
+        return new JobResource($this->jobService->updateJob($request->safe(), $job));
     }
 
     /**
      * Delete job by admin.
      *
-     * @param JobStoreRequest $request
-     * @param integer $id
-     * @return void
+     * @param Job $job
+     * 
+     * @return Response
      */
-    public function delete(int $id)
+    public function destroy(Job $job): Response
     {
-        $job = Job::find($id);
         $job->delete();
         return response()->noContent();
     }

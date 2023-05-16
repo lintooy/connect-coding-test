@@ -15,13 +15,13 @@ class CompanyResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'about' => $this->about,
-            'address' => $this->address,
+            'id'           => $this->id,
+            'name'         => $this->name,
+            'about'        => $this->about,
+            'address'      => $this->address,
             'phone_number' => $this->phone_number,
-            'created_at' => $this->created_at->timestamp,
-            'updated_at' => $this->updated_at->timestamp,
+            'created_at'   => $this->created_at->timestamp,
+            'updated_at'   => $this->updated_at->timestamp,
         ];
     }
 }
