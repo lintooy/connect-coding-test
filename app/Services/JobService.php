@@ -40,7 +40,7 @@ class JobService
      *
      * @param Job $job
      * 
-     * @return mixed
+     * @return mixed JsonResponse | JobResource
      */
     public function showOpenJob(Job $job): mixed
     {

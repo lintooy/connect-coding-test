@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\JobStatus;
 use App\Http\Requests\JobStoreRequest;
+use App\Http\Requests\JobUpdateRequest;
 use App\Http\Resources\JobResource;
 use App\Models\Job;
 use App\Services\JobService;
@@ -15,6 +15,11 @@ use Illuminate\Http\Response;
 class JobController extends Controller
 {
 
+    /**
+     * __construct
+     *
+     * @param JobService $jobService
+     */
     public function __construct(protected JobService $jobService)
     {
     }
@@ -87,7 +92,7 @@ class JobController extends Controller
      * 
      * @return JobResource
      */
-    public function update(JobStoreRequest $request, Job $job): JobResource
+    public function update(JobUpdateRequest $request, Job $job): JobResource
     {
         return new JobResource($this->jobService->updateJob($request->safe(), $job));
     }

@@ -17,8 +17,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
-    Route::middleware(['guest'])->prefix('/admin')->group(function () {
-        Route::post('login', [LoginController::class, 'login']);
+    Route::middleware(['guest'])->group(function () {
+        Route::post('admin/login', [LoginController::class, 'login'])->name('login');
+
+        Route::prefix('jobs')
+        ->name('job.')
+        ->controller(JobController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{job}', 'show')->name('show');
+        });
     });
 
     Route::middleware('auth:sanctum')->prefix('/admin')->group(function () {
@@ -37,12 +45,4 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{job}', 'destroy')->name('destroy');
         });
     });
-
-    Route::prefix('jobs')
-        ->name('job.')
-        ->controller(JobController::class)
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/{job}', 'show')->name('show');
-        });
 });

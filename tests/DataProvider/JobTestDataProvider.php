@@ -7,11 +7,20 @@ class JobTestDataProvider
 {
     protected $faker;
 
+    /**
+     * __construct
+     *
+     */
     public function __construct()
     {
         $this->faker = FakerFactory::create();
     }
 
+    /**
+     * Data for index test
+     *
+     * @return array
+     */
     public function testIndexProvider(): array
     {
         return [
@@ -31,6 +40,11 @@ class JobTestDataProvider
         ];
     }
 
+    /**
+     * Data for store test
+     *
+     * @return array
+     */
     public function testStoreProvider(): array
     {
         return [
@@ -63,6 +77,11 @@ class JobTestDataProvider
         ];
     }
 
+    /**
+     * Data for invalid company id test
+     *
+     * @return array
+     */
     public function testInvalidCompanyIdProvider(): array
     {
         return [
@@ -77,6 +96,11 @@ class JobTestDataProvider
         ];
     }
 
+    /**
+     * Data for invalid job title id test
+     *
+     * @return array
+     */
     public function testInvalidJobTitleIdProvider(): array
     {
         return [
@@ -91,6 +115,11 @@ class JobTestDataProvider
         ];
     }
 
+    /**
+     * Data for invalid description test
+     *
+     * @return array
+     */
     public function testInvalidDescriptionProvider(): array
     {
         return [
@@ -105,6 +134,11 @@ class JobTestDataProvider
         ];
     }
 
+    /**
+     * Data for invalid status test
+     *
+     * @return array
+     */
     public function testInvalidStatusProvider(): array
     {
         return [
@@ -119,6 +153,11 @@ class JobTestDataProvider
         ];
     }
 
+    /**
+     * Data for update test
+     *
+     * @return array
+     */
     public function testUpdateProvider(): array
     {
         return [
@@ -151,6 +190,11 @@ class JobTestDataProvider
         ];
     }
 
+    /**
+     * Data for delete not found test
+     *
+     * @return array
+     */
     public function testDeleteNotFoundProvider(): array
     {
         return [

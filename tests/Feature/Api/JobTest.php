@@ -9,7 +9,16 @@ use Tests\TestCase;
 class JobTest extends TestCase
 {
     private $admin;
+    private const HEADERS = [
+        'Accept' => 'aplication/json',
+        'Content-Type' => 'aplication/json'
+    ];
 
+    /**
+     * Test setup.
+     *
+     * @return void
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -23,11 +32,14 @@ class JobTest extends TestCase
     /**
      * Display all open jobs.
      * 
+     * @param array $params
+     * @param array $expected
+     * 
      * @dataProvider Tests\DataProvider\JobTestDataProvider::testIndexProvider()
      */
     public function test_index(array $params, array $expected)
     {
-        $response = $this->get(route('job.index', $params));
+        $response = $this->get(route('job.index', $params), self::HEADERS);
 
         $response
             ->assertOk()
@@ -41,7 +53,7 @@ class JobTest extends TestCase
     public function test_show()
     {
         $job = Job::factory()->open()->create();
-        $response = $this->get(route('job.show', ['job' => $job]));
+        $response = $this->get(route('job.show', ['job' => $job]), self::HEADERS);
 
         $response
             ->assertOk()
@@ -59,17 +71,15 @@ class JobTest extends TestCase
     public function test_show_not_found()
     {
         $job = Job::factory()->closed()->create();
-        $response = $this->get(route('job.show', ['job' => $job]));
+        $response = $this->get(route('job.show', ['job' => $job]), self::HEADERS);
 
         $response->assertNotFound();
     }
 
     /**
-     * Create an job.
+     * Create a job.
      *
-     * @param array $data
      * @param array $structure
-     * @param array $expected
      * 
      * @dataProvider Tests\DataProvider\JobTestDataProvider::testStoreProvider()
      */
@@ -109,18 +119,20 @@ class JobTest extends TestCase
         $this->assertGuest();
 
         $job = Job::factory()->make();
-        $response = $this->json('POST', route('job.store'), [
-            'company_id' => $job->company_id,
+
+        $response = $this->post(route('job.store'), [
+            'company_id'   => $job->company_id,
             'job_title_id' => $job->job_title_id,
-            'description' => $job->description,
-            'status' => $job->status->key,
-        ]);
+            'description'  => $job->description,
+            'status'       => $job->status->key,
+        ], self::HEADERS);
 
         $response->assertUnauthorized();
     }
 
     /**
      * Verify that it will return an invalid error if company does not exists.
+     * 
      * @param $data
      * @param $invalidFields
      * 
@@ -130,12 +142,13 @@ class JobTest extends TestCase
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->post(route('job.store'), $data)
+            ->post(route('job.store'), $data, self::HEADERS)
             ->assertInvalid($invalidFields);
     }
 
     /**
      * Verify that it will return an invalid error if job title does not exists.
+     * 
      * @param $data
      * @param $invalidFields
      * 
@@ -145,12 +158,13 @@ class JobTest extends TestCase
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->post(route('job.store'), $data)
+            ->post(route('job.store'), $data, self::HEADERS)
             ->assertInvalid($invalidFields);
     }
 
     /**
      * Verify that it will return an invalid error if description does not exists.
+     * 
      * @param $data
      * @param $invalidFields
      * 
@@ -160,12 +174,13 @@ class JobTest extends TestCase
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->post(route('job.store'), $data)
+            ->post(route('job.store'), $data, self::HEADERS)
             ->assertInvalid($invalidFields);
     }
 
     /**
      * Verify that it will return an invalid error if status does not exists.
+     *
      * @param $data
      * @param $invalidFields
      * 
@@ -175,16 +190,14 @@ class JobTest extends TestCase
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->post(route('job.store'), $data)
+            ->post(route('job.store'), $data, self::HEADERS)
             ->assertInvalid($invalidFields);
     }
 
     /**
      * Verify that it can update job.
      *
-     * @param array $data
      * @param array $structure
-     * @param array $expected
      * 
      * @dataProvider Tests\DataProvider\JobTestDataProvider::testStoreProvider()
      */
@@ -218,6 +231,7 @@ class JobTest extends TestCase
 
     /**
      * Verify that it will return an invalid error if company does not exists.
+     * 
      * @param $data
      * @param $invalidFields
      * 
@@ -225,14 +239,17 @@ class JobTest extends TestCase
      */
     public function test_update_company_id_failure(array $data, array $invalidFields)
     {
+        $job = Job::factory()->create();
+
         $this
             ->actingAs($this->admin, 'web')
-            ->post(route('job.store'), $data)
+            ->put(route('job.update', ['job'=>$job]), $data, self::HEADERS)
             ->assertInvalid($invalidFields);
     }
 
     /**
      * Verify that it will return an invalid error if job title does not exists.
+     * 
      * @param $data
      * @param $invalidFields
      * 
@@ -240,14 +257,17 @@ class JobTest extends TestCase
      */
     public function test_update_job_title_id_failure(array $data, array $invalidFields)
     {
+        $job = Job::factory()->create();
+        
         $this
             ->actingAs($this->admin, 'web')
-            ->post(route('job.store'), $data)
+            ->put(route('job.update', ['job' => $job]), $data, self::HEADERS)
             ->assertInvalid($invalidFields);
     }
 
     /**
      * Verify that it will return an invalid error if description does not exists.
+     * 
      * @param $data
      * @param $invalidFields
      * 
@@ -255,14 +275,17 @@ class JobTest extends TestCase
      */
     public function test_update_description_failure(array $data, array $invalidFields)
     {
+        $job = Job::factory()->create();
+
         $this
             ->actingAs($this->admin, 'web')
-            ->post(route('job.store'), $data)
+            ->put(route('job.update', ['job' => $job]), $data, self::HEADERS)
             ->assertInvalid($invalidFields);
     }
 
     /**
      * Verify that it will return an invalid error if status does not exists.
+     * 
      * @param $data
      * @param $invalidFields
      * 
@@ -270,9 +293,11 @@ class JobTest extends TestCase
      */
     public function test_update_status_failure(array $data, array $invalidFields)
     {
+        $job = Job::factory()->create();
+
         $this
             ->actingAs($this->admin, 'web')
-            ->post(route('job.store'), $data)
+            ->put(route('job.update', ['job' => $job]), $data, self::HEADERS)
             ->assertInvalid($invalidFields);
     }
 
@@ -283,14 +308,16 @@ class JobTest extends TestCase
     public function test_delete()
     {
         $job = Job::factory()->create();
+
         $this
             ->actingAs($this->admin, 'web')
-            ->delete(route('job.destroy', ['job' => $job]))
+            ->delete(route('job.destroy', ['job' => $job]), self::HEADERS)
             ->assertNoContent();
     }
 
     /**
      * Verify that it will return a 404 if job does not exists.
+     * 
      * @param $params
      * 
      * @dataProvider Tests\DataProvider\JobTestDataProvider::testDeleteNotFoundProvider()
@@ -299,7 +326,7 @@ class JobTest extends TestCase
     {
         $this
             ->actingAs($this->admin, 'web')
-            ->delete(route('job.destroy', $params))
+            ->delete(route('job.destroy', $params), self::HEADERS)
             ->assertNotFound();
     }
 }
