@@ -65,7 +65,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * test_store
+     * Create an job.
      *
      * @param array $data
      * @param array $structure
@@ -100,6 +100,10 @@ class JobTest extends TestCase
             ]);
     }
 
+    /**
+     * Verify that only authenticated admin can store job data.
+     *
+     */
     public function test_store_unauthenticated()
     {
         $this->assertGuest();
@@ -116,7 +120,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * Return an invalid error if company does not exists.
+     * Verify that it will return an invalid error if company does not exists.
      * @param $data
      * @param $invalidFields
      * 
@@ -131,7 +135,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * Return an invalid error if job title does not exists.
+     * Verify that it will return an invalid error if job title does not exists.
      * @param $data
      * @param $invalidFields
      * 
@@ -146,7 +150,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * Return an invalid error if company does not exists.
+     * Verify that it will return an invalid error if description does not exists.
      * @param $data
      * @param $invalidFields
      * 
@@ -161,7 +165,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * Return an invalid error if company does not exists.
+     * Verify that it will return an invalid error if status does not exists.
      * @param $data
      * @param $invalidFields
      * 
@@ -176,7 +180,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * test_update
+     * Verify that it can update job.
      *
      * @param array $data
      * @param array $structure
@@ -213,7 +217,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * Return an invalid error if company does not exists.
+     * Verify that it will return an invalid error if company does not exists.
      * @param $data
      * @param $invalidFields
      * 
@@ -228,7 +232,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * Return an invalid error if job title does not exists.
+     * Verify that it will return an invalid error if job title does not exists.
      * @param $data
      * @param $invalidFields
      * 
@@ -243,7 +247,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * Return an invalid error if company does not exists.
+     * Verify that it will return an invalid error if description does not exists.
      * @param $data
      * @param $invalidFields
      * 
@@ -258,7 +262,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * Return an invalid error if company does not exists.
+     * Verify that it will return an invalid error if status does not exists.
      * @param $data
      * @param $invalidFields
      * 
@@ -273,7 +277,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * test_delete
+     * Verify that it can successfully delete job.
      *
      */
     public function test_delete()
@@ -286,7 +290,7 @@ class JobTest extends TestCase
     }
 
     /**
-     * 
+     * Verify that it will return a 404 if job does not exists.
      * @param $params
      * 
      * @dataProvider Tests\DataProvider\JobTestDataProvider::testDeleteNotFoundProvider()

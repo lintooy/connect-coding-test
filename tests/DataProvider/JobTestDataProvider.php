@@ -31,43 +31,6 @@ class JobTestDataProvider
         ];
     }
 
-    public function testShowProvider(): array
-    {
-        return [
-            [
-                [
-                    'data' => [
-                        'id',
-                        'company'     => [
-                            'id',
-                            'name',
-                            'about',
-                            'address',
-                            'phone_number',
-                            'created_at',
-                            'updated_at',
-                        ],
-                        'job_title'   => [
-                            'id',
-                            'name',
-                            'created_at',
-                            'updated_at',
-                        ],
-                        'description',
-                        'status',
-                        'created_at',
-                        'updated_at'
-                    ]
-                ],
-                [
-                    'data' => [
-                        'id' => 1,
-                    ]
-                ],
-            ]
-        ];
-    }
-
     public function testStoreProvider(): array
     {
         return [
