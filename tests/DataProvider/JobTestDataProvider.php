@@ -70,18 +70,8 @@ class JobTestDataProvider
 
     public function testStoreProvider(): array
     {
-        $companyId = rand(1, 100);
-        $jobTitleId = rand(1, 50);
-        $description = $this->faker->text();
-
         return [
             [
-                [
-                    'company_id' => $companyId,
-                    'job_title_id' => $jobTitleId,
-                    'description' => $description,
-                    'status' => 'Open'
-                ],
                 [
                     'data' => [
                         'id',
@@ -105,24 +95,12 @@ class JobTestDataProvider
                         'created_at',
                         'updated_at'
                     ],
-                ],
-                [
-                    'data' => [
-                        'company'     => [
-                            'id'      => $companyId,
-                        ],
-                        'job_title'   => [
-                            'id'      => $jobTitleId,
-                        ],
-                        'description' => $description,
-                        'status'      => 'Open'
-                    ]
                 ]
             ]
         ];
     }
 
-    public function testInvalidCompanyId(): array
+    public function testInvalidCompanyIdProvider(): array
     {
         return [
             [
@@ -136,7 +114,7 @@ class JobTestDataProvider
         ];
     }
 
-    public function testInvalidJobTitleId(): array
+    public function testInvalidJobTitleIdProvider(): array
     {
         return [
             [
@@ -150,7 +128,7 @@ class JobTestDataProvider
         ];
     }
 
-    public function testInvalidDescription(): array
+    public function testInvalidDescriptionProvider(): array
     {
         return [
             [
@@ -164,7 +142,7 @@ class JobTestDataProvider
         ];
     }
 
-    public function testInvalidStatus(): array
+    public function testInvalidStatusProvider(): array
     {
         return [
             [
@@ -183,12 +161,6 @@ class JobTestDataProvider
         return [
             [
                 [
-                    'company_id' => 124,
-                    'job_title_id' => 130,
-                    'description' => 'This is a description.',
-                    'status' => 'Open'
-                ],
-                [
                     'data' => [
                         'id',
                         'company' => [
@@ -211,24 +183,12 @@ class JobTestDataProvider
                         'created_at',
                         'updated_at'
                     ],
-                ],
-                [
-                    'data' => [
-                        'company'     => [
-                            'id'      => 124,
-                        ],
-                        'job_title'   => [
-                            'id'      => 130,
-                        ],
-                        'description' => 'This is a description.',
-                        'status'      => 'Open'
-                    ]
                 ]
             ]
         ];
     }
 
-    public function testDeleteNotFound(): array
+    public function testDeleteNotFoundProvider(): array
     {
         return [
             [

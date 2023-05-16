@@ -73,40 +73,56 @@ class JobTest extends TestCase
      * 
      * @dataProvider Tests\DataProvider\JobTestDataProvider::testStoreProvider()
      */
-    public function test_store(array $data, array $structure, array $expected)
+    public function test_store(array $structure)
     {
-        // print_r($data);
-        $response = $this->actingAs($this->admin, 'web')->post(route('job.store'), $data);
+        $job = Job::factory()->make();
+        $response = $this->actingAs($this->admin, 'web')->post(route('job.store'), [
+            'company_id' => $job->company_id,
+            'job_title_id' => $job->job_title_id,
+            'description' => $job->description,
+            'status' => $job->status->key,
+        ]);
 
         $response
             ->assertCreated()
             ->assertJsonStructure($structure)
-            ->assertJson($expected);
+            ->assertJson([
+                'data' => [
+                    'company'     => [
+                        'id'      => $job->company_id,
+                    ],
+                    'job_title'   => [
+                        'id'      => $job->job_title_id,
+                    ],
+                    'description' => $job->description,
+                    'status'      => $job->status->key
+                ]
+            ]);
     }
 
-    // public function test_create_unauthenticated()
-    // {
-    //     $this->assertGuest();
+    public function test_store_unauthenticated()
+    {
+        $this->assertGuest();
 
-    //     $job = Job::factory()->make();
-    //     $response = $this->json('POST', route('job.store'), [
-    //         'company_id' => $job->company_id,
-    //         'job_title_id' => $job->job_title_id,
-    //         'description' => $job->description,
-    //         'status' => $job->status->key,
-    //     ]);
+        $job = Job::factory()->make();
+        $response = $this->json('POST', route('job.store'), [
+            'company_id' => $job->company_id,
+            'job_title_id' => $job->job_title_id,
+            'description' => $job->description,
+            'status' => $job->status->key,
+        ]);
 
-    //     $response->assertUnauthorized();
-    // }
+        $response->assertUnauthorized();
+    }
 
     /**
      * Return an invalid error if company does not exists.
      * @param $data
      * @param $invalidFields
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyId()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyIdProvider()
      */
-    public function test_create_company_id_failure(array $data, array $invalidFields)
+    public function test_store_company_id_failure(array $data, array $invalidFields)
     {
         $this
             ->actingAs($this->admin, 'web')
@@ -114,14 +130,14 @@ class JobTest extends TestCase
             ->assertInvalid($invalidFields);
     }
 
-     /**
+    /**
      * Return an invalid error if job title does not exists.
      * @param $data
      * @param $invalidFields
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyId()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidJobTitleIdProvider()
      */
-    public function test_create_job_title_id_failure(array $data, array $invalidFields)
+    public function test_store_job_title_id_failure(array $data, array $invalidFields)
     {
         $this
             ->actingAs($this->admin, 'web')
@@ -134,9 +150,9 @@ class JobTest extends TestCase
      * @param $data
      * @param $invalidFields
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidDescription()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidDescriptionProvider()
      */
-    public function test_create_description_failure(array $data, array $invalidFields)
+    public function test_store_description_failure(array $data, array $invalidFields)
     {
         $this
             ->actingAs($this->admin, 'web')
@@ -149,9 +165,9 @@ class JobTest extends TestCase
      * @param $data
      * @param $invalidFields
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidStatus()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidStatusProvider()
      */
-    public function test_create_status_failure(array $data, array $invalidFields)
+    public function test_store_status_failure(array $data, array $invalidFields)
     {
         $this
             ->actingAs($this->admin, 'web')
@@ -168,15 +184,32 @@ class JobTest extends TestCase
      * 
      * @dataProvider Tests\DataProvider\JobTestDataProvider::testStoreProvider()
      */
-    public function test_update(array $data,array $structure, array $expected)
+    public function test_update(array $structure)
     {
         $job = Job::factory()->create();
-        $response = $this->actingAs($this->admin, 'web')->put(route('job.update', ['job' => $job]), $data);
+        $fake = Job::factory()->make();
+        $response = $this->actingAs($this->admin, 'web')->put(route('job.update', ['job' => $job]), [
+            'company_id' => $fake->company->id,
+            'job_title_id' => $fake->jobTitle->id,
+            'description' => $fake->description,
+            'status' => $fake->status->key
+        ]);
 
         $response
             ->assertOk()
             ->assertJsonStructure($structure)
-            ->assertJson($expected);
+            ->assertJson([
+                'data' => [
+                    'company'     => [
+                        'id'      => $fake->company->id,
+                    ],
+                    'job_title'   => [
+                        'id'      => $fake->jobTitle->id,
+                    ],
+                    'description' => $fake->description,
+                    'status'      => $fake->status->key
+                ]
+            ]);
     }
 
     /**
@@ -184,7 +217,7 @@ class JobTest extends TestCase
      * @param $data
      * @param $invalidFields
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyId()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyIdProvider()
      */
     public function test_update_company_id_failure(array $data, array $invalidFields)
     {
@@ -194,12 +227,12 @@ class JobTest extends TestCase
             ->assertInvalid($invalidFields);
     }
 
-     /**
+    /**
      * Return an invalid error if job title does not exists.
      * @param $data
      * @param $invalidFields
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidCompanyId()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidJobTitleIdProvider()
      */
     public function test_update_job_title_id_failure(array $data, array $invalidFields)
     {
@@ -214,7 +247,7 @@ class JobTest extends TestCase
      * @param $data
      * @param $invalidFields
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidDescription()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidDescriptionProvider()
      */
     public function test_update_description_failure(array $data, array $invalidFields)
     {
@@ -229,7 +262,7 @@ class JobTest extends TestCase
      * @param $data
      * @param $invalidFields
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidStatus()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testInvalidStatusProvider()
      */
     public function test_update_status_failure(array $data, array $invalidFields)
     {
@@ -239,6 +272,10 @@ class JobTest extends TestCase
             ->assertInvalid($invalidFields);
     }
 
+    /**
+     * test_delete
+     *
+     */
     public function test_delete()
     {
         $job = Job::factory()->create();
@@ -252,7 +289,7 @@ class JobTest extends TestCase
      * 
      * @param $params
      * 
-     * @dataProvider Tests\DataProvider\JobTestDataProvider::testDeleteNotFound()
+     * @dataProvider Tests\DataProvider\JobTestDataProvider::testDeleteNotFoundProvider()
      */
     public function test_delete_not_found(array $params)
     {

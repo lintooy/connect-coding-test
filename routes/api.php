@@ -25,17 +25,8 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', [LoginController::class, 'logout']);
 
         Route::get('me', [AdminController::class, 'me']);
-    });
 
-    Route::prefix('jobs')
-        ->name('job.')
-        ->controller(JobController::class)
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/{job}', 'show')->name('show');
-        });
-
-    Route::prefix('admin/jobs')
+        Route::prefix('jobs')
         ->name('job.')
         ->controller(JobController::class)
         ->group(function () {
@@ -44,5 +35,14 @@ Route::prefix('v1')->group(function () {
             Route::post('/', 'store')->name('store');
             Route::put('/{job}', 'update')->name('update');
             Route::delete('/{job}', 'destroy')->name('destroy');
+        });
+    });
+
+    Route::prefix('jobs')
+        ->name('job.')
+        ->controller(JobController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{job}', 'show')->name('show');
         });
 });

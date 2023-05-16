@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\JobStatus;
+use App\Http\Resources\JobResource;
 use App\Models\Job;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -32,6 +33,22 @@ class JobService
     public function allOpenJobs(Request $request): LengthAwarePaginator
     {
         return Job::where('status', JobStatus::Open)->paginate($request->per_page);
+    }
+
+    /**
+     * Show a opening job to applicants.
+     *
+     * @param Job $job
+     * 
+     * @return mixed
+     */
+    public function showOpenJob(Job $job): mixed
+    {
+        if ($job->status->value !== JobStatus::Open) {
+            return response()->json([], 404);
+        }
+
+        return new JobResource($job);
     }
 
     /**

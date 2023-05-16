@@ -2,30 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\AdminResource;
+use App\Http\Requests\LoginRequest;
+use App\Services\LoginService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
+    public function __construct(protected LoginService $loginService)
     {
-        if (Auth::guard('web')->attempt($request->only(['email', 'password']))) {
-            $request->session()->regenerate();
-
-            return new AdminResource(Auth::user());
-        }
-
-        return response()->json([], 401);
+        
     }
 
-    public function logout(Request $request)
+    /**
+     * Authenticate user.
+     *
+     * @param LoginRequest $request
+     * 
+     * @return mixed
+     */
+    public function login(LoginRequest $request): mixed
     {
-        Auth::guard('web')->logout();
+        return $this->loginService->login($request);
+    }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->noContent();
+    /**
+     * Logout.
+     *
+     * @param Request $request
+     * 
+     * @return Response
+     */
+    public function logout(Request $request): Response
+    {
+        return $this->loginService->logout($request);
     }
 }

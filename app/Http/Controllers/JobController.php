@@ -36,15 +36,11 @@ class JobController extends Controller
      *
      * @param Job $job
      * 
-     * @return JobResource
+     * @return mixed
      */
-    public function show(Job $job): JobResource
+    public function show(Job $job): mixed
     {
-        if ($job->status->value !== JobStatus::Open) {
-            abort(404);
-        }
-
-        return new JobResource($job);
+        return $this->jobService->showOpenJob($job);
     }
 
     /**
